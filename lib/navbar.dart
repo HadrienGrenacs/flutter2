@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:flutter2/Modules/pets.dart';
 import 'package:flutter2/Modules/planning.dart';
+import 'Modules/Pets/petBody.dart';
 import 'Theme/Theme.dart';
 import 'Modules/home.dart';
 
@@ -15,10 +15,10 @@ class HomePage extends StatefulWidget {
 /// This is the private State class that goes with MyStatefulWidget.
 class _MyStatefulWidgetState extends State<HomePage> {
   int _selectedIndex = 1;
-  static const List<Widget> _widgetOptions = <Widget>[
+  static List<Widget> _widgetOptions = <Widget>[
     Planning(),
     Home(),
-    Pets()
+    PetBody()
   ];
 
   void _onItemTapped(int index) {
