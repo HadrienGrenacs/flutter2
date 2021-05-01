@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter2/Modules/Pets/createPet.dart';
 import 'package:flutter2/Theme/Theme.dart';
 
 class Home extends StatefulWidget {
@@ -47,7 +48,7 @@ class _HomeState extends State<Home> {
                 foregroundColor: MaterialStateProperty.all<Color>(AppTheme.ZK_Olive),
               ),
               autofocus: false,
-              onPressed: () {},
+              onPressed: () => Navigator.push(context,MaterialPageRoute(builder: (context) => CreatePet())),
               icon: Icon(Icons.add_circle_rounded, size: 40,),
               label: Text('Add a pet', style: TextStyle(fontSize: 20))
           ))

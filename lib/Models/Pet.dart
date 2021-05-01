@@ -1,15 +1,13 @@
 class Pet {
-  final String 
-  image,
-  name, 
-  species,
-  foodType,
-  ownerName, 
-  ownerPhoneNumber,
-  dateEntry,
-  dateExit
-  ;
-  final int id, sex, age,enclosure;
+  final String image,
+      name,
+      species,
+      foodType,
+      ownerName,
+      ownerPhoneNumber,
+      dateEntry,
+      dateExit;
+  final int id, sex, age, enclosure;
 
   Pet({
     this.image,
@@ -22,7 +20,7 @@ class Pet {
     this.ownerName,
     this.ownerPhoneNumber,
     this.dateEntry,
-    this.dateExit, 
+    this.dateExit,
     this.id,
   });
 }

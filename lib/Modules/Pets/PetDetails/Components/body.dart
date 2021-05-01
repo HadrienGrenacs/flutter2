@@ -16,7 +16,7 @@ class Body extends StatelessWidget {
             height: size.height,
             child: Stack(
               children: <Widget>[
-                Image(image: AssetImage(pet.image)),
+                Image(image: AssetImage(pet.image)),                
                 Container(
                   margin: EdgeInsets.only(top: size.height * 0.4),
                   height: 500,
@@ -146,7 +146,24 @@ class OwnerInfos extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-                                Padding(
+          Row(children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 200, 0),
+              child: Text("From", 
+              style: TextStyle(
+              fontSize: 20,
+              color: Colors.black.withOpacity(0.7),
+              fontWeight: FontWeight.normal),
+              ),
+            ),
+            Text("To", 
+            style: TextStyle(
+            fontSize: 20,
+            color: Colors.black.withOpacity(0.7),
+            fontWeight: FontWeight.normal),
+            )
+          ]),
+          Padding(
           padding: const EdgeInsets.symmetric(vertical: 0),
           child: Text("Owner",
           style: TextStyle(
@@ -170,7 +187,20 @@ class OwnerInfos extends StatelessWidget {
             color: Colors.black.withOpacity(0.7),
             fontWeight: FontWeight.normal),
         ),
-
+        Container(
+          padding: EdgeInsets.all(5.0),
+          width: (MediaQuery.of(context).size.width),
+          height: 50,
+          child: ElevatedButton(
+            style: ButtonStyle(
+            backgroundColor:
+              MaterialStateProperty.all<Color>(AppTheme.ZK_Gray),
+              foregroundColor:
+              MaterialStateProperty.all<Color>(AppTheme.ZK_Olive),
+              ),
+              autofocus: false,
+              onPressed: () => {},
+              child: Text('Delete Pet', style: TextStyle(fontSize: 20)))),
       ],),
     );
   }
