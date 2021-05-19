@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:flutter2/Modules/planning.dart';
+import 'package:flutter2/Modules/Planning/DatePicker.dart';
 import 'Modules/Pets/petBody.dart';
 import 'Theme/Theme.dart';
 import 'Modules/home.dart';
 
 /// This is the stateful widget that the main application instantiates.
 class HomePage extends StatefulWidget {
-
   @override
   _MyStatefulWidgetState createState() => _MyStatefulWidgetState();
 }
@@ -16,7 +15,7 @@ class HomePage extends StatefulWidget {
 class _MyStatefulWidgetState extends State<HomePage> {
   int _selectedIndex = 1;
   static List<Widget> _widgetOptions = <Widget>[
-    Planning(),
+    DatePicker(),
     Home(),
     PetBody()
   ];
@@ -50,7 +49,6 @@ class _MyStatefulWidgetState extends State<HomePage> {
         ],
         onTap: _onItemTapped,
       ),
-      
     );
   }
 }
