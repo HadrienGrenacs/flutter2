@@ -1,4 +1,71 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+
+class AnimalInformations extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    CollectionReference animals = FirebaseFirestore.instance.collection('animals');
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: animals.snapshots(),
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (snapshot.hasError) {
+          return Text('Something went wrong');
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Text("Loading");
+        }
+
+        return new ListView(
+          children: snapshot.data.docs.map((DocumentSnapshot document) {
+            return new ListTile(
+              title: new Text(document.data()['name']),
+              subtitle: new Text(document.data()['food']),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+}
+
 class Pet {
+
+  List<String> documentIds = [];
+
+  List<String> GetAnmailDocIds() {
+    FirebaseFirestore.instance
+        .collection('animals')
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        documentIds.add(doc.id);
+      });
+    });
+    return documentIds;
+  }
+
+/*
+
+  List<Pet> FillPets() {
+    List<Pet> newPets = [];
+    documentIds = GetAnmailDocIds();
+
+    CollectionReference animals = FirebaseFirestore.instance.collection('animals');
+    for (int i=0; i < documentIds.length; i++) {
+      snapshot animal = animals.doc(documentIds.first).get();
+      Pet pet = new Pet(
+        age:            
+      );
+      documentIds.remove(documentIds.first);
+      newPets.add(pet);
+    }
+    return newPets;
+  }
+*/
+
   final String image,
       name,
       species,
@@ -26,6 +93,8 @@ class Pet {
 }
 
 List<Pet> pets = [
+  /*
+  
   Pet(
     image: "assets/images/black-doggo.jpg",
     name: "Dark Doggo",
@@ -54,6 +123,7 @@ List<Pet> pets = [
     dateExit: "09/01/2021",
     id: 2,
   ),
+   */
   Pet(
     image: "assets/images/kakapo.jpg",
     name: "Step Kakapo",
@@ -68,6 +138,8 @@ List<Pet> pets = [
     dateExit: "03/01/2021",
     id: 3,
   ),
+  /*
+  
   Pet(
     image: "assets/images/kangoo.jpg",
     name: "Dababy",
@@ -110,4 +182,5 @@ List<Pet> pets = [
     dateExit: "30/01/2021",
     id: 6,
   ),
+  */
 ];
