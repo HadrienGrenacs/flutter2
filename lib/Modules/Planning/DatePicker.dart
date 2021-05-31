@@ -1,23 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter2/Modules/Planning/TaskCard.dart';
 import 'package:flutter2/Modules/Planning/TaskDetails.dart';
-import 'package:flutter2/Models/Task.dart';
-import 'package:flutter2/Theme/Theme.dart';
 
 class DatePicker extends StatefulWidget {
+  final DocumentSnapshot member;
+
+  const DatePicker({Key key, this.member = null}) : super(key: key);
+
   @override
   _DatePickerState createState() => _DatePickerState();
 }
 
 class _DatePickerState extends State<DatePicker> {
-  /// Which holds the selected date
-  /// Defaults to today's date.
-  DateTime selectedDate = DateTime.now();
+  DateTime selectedDate = new DateTime(
+      DateTime.now().year, DateTime.now().month, DateTime.now().day);
+  Stream<QuerySnapshot> _tasks;
+  FirebaseAuth auth = FirebaseAuth.instance;
 
-  /// This decides which day will be enabled
-  /// This will be called every time while displaying day in calender.
   bool _decideWhichDayToEnable(DateTime day) {
     if ((day.isAfter(DateTime.now().subtract(Duration(days: 1))) &&
         day.isBefore(DateTime.now().add(Duration(days: 7))))) {
@@ -43,26 +45,25 @@ class _DatePickerState extends State<DatePicker> {
 
   @override
   Widget build(BuildContext context) {
-    Query tasks = FirebaseFirestore.instance
+    _tasks = FirebaseFirestore.instance
         .collection('tasks')
         .where('starting', isGreaterThanOrEqualTo: selectedDate)
-        .where('starting', isLessThan: selectedDate.add(Duration(days: 1)));
+        .where('starting', isLessThan: selectedDate.add(Duration(days: 1)))
+        .where('user_id',
+            isEqualTo:
+                widget.member != null ? widget.member.id : auth.currentUser.uid)
+        .snapshots();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Planning'),
-        backgroundColor: AppTheme.ZK_Azure,
-      ),
-      resizeToAvoidBottomInset: false,
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
+    return Center(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Text(
             "${selectedDate.toLocal()}".split(' ')[0],
             style: TextStyle(fontSize: 33, fontWeight: FontWeight.bold),
           ),
           SizedBox(
-            height: 20.0,
+            height: 18.0,
           ),
           ElevatedButton(
             onPressed: () => _selectDate(context),
@@ -73,85 +74,48 @@ class _DatePickerState extends State<DatePicker> {
             ),
           ),
           StreamBuilder<QuerySnapshot>(
-            stream: tasks.snapshots(),
+            stream: _tasks,
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.hasError) {
-                return Text("You don't have the Rights to do that");
+                return Text(
+                    "You don't have the Rights to do that. ERROR: ${snapshot.error}");
               }
-
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Text("Loading");
               }
 
-              return new ListView(
-                children: snapshot.data.docs.map((DocumentSnapshot document) {
-                  return new TaskCard(
-                      task: document,
-                      press: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => TaskDetails(
-                                    task: document,
-                                  ))));
-                }).toList(),
-              );
+              if (!snapshot.hasData || snapshot.data.docs.isEmpty) {
+                return Container(
+                  height: 120.0,
+                  width: MediaQuery.of(context).size.width,
+                  child: Align(
+                      alignment: Alignment.center,
+                      child: Text('Nothing to display for today')),
+                );
+              }
+              return Container(
+                  height: MediaQuery.of(context).size.height * 0.5,
+                  width: MediaQuery.of(context).size.width,
+                  child: new ListView(
+                    children:
+                        snapshot.data.docs.map((DocumentSnapshot document) {
+                      return new TaskCard(
+                          task: document,
+                          press: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => TaskDetails(
+                                        task: document,
+                                      ))));
+                    }).toList(),
+                  ));
             },
           )
         ],
       ),
     );
   }
-  // Widget build(BuildContext context) {
-  //   final tasksOfTheDay =
-  //       tasks.where((element) => element.date.day == selectedDate.day);
-
-  //   return Scaffold(
-  //     appBar: AppBar(
-  //       title: Text('Planning'),
-  //       backgroundColor: AppTheme.ZK_Azure,
-  //     ),
-  //     resizeToAvoidBottomInset: false,
-  //     body: Column(
-  //       mainAxisSize: MainAxisSize.min,
-  //       children: <Widget>[
-  //         Text(
-  //           "${selectedDate.toLocal()}".split(' ')[0],
-  //           style: TextStyle(fontSize: 33, fontWeight: FontWeight.bold),
-  //         ),
-  //         SizedBox(
-  //           height: 20.0,
-  //         ),
-  //         ElevatedButton(
-  //           onPressed: () => _selectDate(context),
-  //           child: Text(
-  //             'View planning',
-  //             style:
-  //                 TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-  //           ),
-  //         ),
-  //         Container(
-  //             width: (MediaQuery.of(context).size.width),
-  //             height: (MediaQuery.of(context).size.height * .50),
-  //             child: (tasksOfTheDay.isEmpty)
-  //                 ? Align(
-  //                     alignment: Alignment.center,
-  //                     child: Text('Nothing to display for today'))
-  //                 : ListView.separated(
-  //                     padding: EdgeInsets.all(8),
-  //                     separatorBuilder: (context, index) => Divider(),
-  //                     itemCount: tasksOfTheDay.length,
-  //                     itemBuilder: (context, index) => TaskCard(
-  //                         task: tasksOfTheDay.elementAt(index),
-  //                         press: () =>
-  //                             Navigator.of(context).push(MaterialPageRoute(
-  //                                 builder: (context) => TaskDetails(
-  //                                       task: tasksOfTheDay.elementAt(index),
-  //                                     ))))))
-  //       ],
-  //     ),
-  //   );
-  // }
 
   buildCupertinoDatePicker(BuildContext context) {
     showModalBottomSheet(

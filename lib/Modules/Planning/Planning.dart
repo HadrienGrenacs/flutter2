@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter2/Modules/Planning/DatePicker.dart';
+import 'package:flutter2/Theme/Theme.dart';
 
-class Planning extends StatefulWidget {
-  const Planning();
-
-  @override
-  _PlanningState createState() => _PlanningState();
-}
-
-class _PlanningState extends State<Planning> {
+class Planning extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Text('Planning'),
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        title: Text('Planning'),
+        backgroundColor: AppTheme.ZK_Azure,
+      ),
+      body: DatePicker(),
     );
   }
 }
