@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:flutter2/Models/PictureHelper.dart';
 
 class Picture extends StatefulWidget {
   @override
@@ -13,60 +13,109 @@ class Picture extends StatefulWidget {
 }
 
 class _PictureState extends State<Picture> {
-  File _image;
+  String downloadURL;
   final picker = ImagePicker();
 
-  Future<String> downloadUserImage(String id) async {
-    print(id);
-    String downloadURL = "";
-    firebase_storage.FirebaseStorage.instance
-        .ref('images/' + id + '.png')
-        .getDownloadURL()
+  @override
+  void initState() {
+    super.initState();
+    PictureHelper.isPicture(FirebaseAuth.instance.currentUser.uid)
         .then((value) {
-      downloadURL = value;
-    }).catchError((onError) {
-      downloadURL =
-          'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png';
+      if (value) {
+        return 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png';
+      } else {
+        return PictureHelper.getPictureURL(
+                FirebaseAuth.instance.currentUser.uid)
+            .then((value) {
+          return value;
+        });
+      }
+    }).then((value) {
+      setState(() {
+        downloadURL = value;
+      });
     });
-    return downloadURL;
-
-    //   try {
-    //     downloadURL = await firebase_storage.FirebaseStorage.instance
-    //         .ref('images/' + id + '.png')
-    //         .getDownloadURL();
-    //     if (downloadURL == null) {
-    //       return ('https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png');
-    //     }
-    //     debugPrint(downloadURL);
-    //     return downloadURL;
-    //   } catch (onError) {
-    //     return ('https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png');
-    //   }
-    // }
   }
+
+  // initializeData() async {
+  //   firebase_storage.FirebaseStorage.instance
+  //       .ref()
+  //       .child('images/')
+  //       .listAll()
+  //       .then((value) {
+  //     print(value.items.length);
+  //     bool empty = true;
+
+  //     value.items.forEach((firebase_storage.Reference ref) {
+  //       if (ref.fullPath ==
+  //           'images/' + FirebaseAuth.instance.currentUser.uid + '.png') {
+  //         empty = false;
+  //       }
+  //     });
+
+  //     setState(() {
+  //       if (empty || value.items.isEmpty) {
+  //         downloadURL =
+  //             'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png';
+  //       } else {
+  //         getData();
+  //       }
+  //     });
+  //   }).catchError((onError) {
+  //     print(onError);
+  //   });
+  // }
+
+  // getData() async {
+  //   firebase_storage.FirebaseStorage.instance
+  //       .ref()
+  //       .child('images/' + FirebaseAuth.instance.currentUser.uid + '.png')
+  //       .getDownloadURL()
+  //       .then((value) {
+  //     setState(() {
+  //       if (value != null) {
+  //         downloadURL = value;
+  //       } else {
+  //         print('error value');
+  //       }
+  //     });
+  //   }).catchError((onError) {
+  //     print(onError);
+  //   });
+  // }
 
   Future<void> uploadFile(String id, String path) async {
     File file = File(path);
 
-    try {
-      await firebase_storage.FirebaseStorage.instance
-          .ref('images/' + id + '.png')
-          .putFile(file);
-    } catch (e) {
-      print(e);
+    firebase_storage.FirebaseStorage.instance
+        .ref()
+        .child('images/' + id + '.png')
+        .putFile(file)
+        .then((value) {
+      PictureHelper.getPictureURL(FirebaseAuth.instance.currentUser.uid)
+          .then((value) {
+        setState(() {
+          downloadURL = value;
+        });
+      });
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Image profile updated')));
+    });
+  }
+
+  Future getPhoto() async {
+    final pickedFile = await picker.getImage(source: ImageSource.camera);
+
+    if (pickedFile != null) {
+      uploadFile(FirebaseAuth.instance.currentUser.uid, pickedFile.path);
+    } else {
+      print('No image selected.');
     }
   }
 
   Future getImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.camera);
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
 
-    setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
-      } else {
-        print('No image selected.');
-      }
-    });
     if (pickedFile != null) {
       uploadFile(FirebaseAuth.instance.currentUser.uid, pickedFile.path);
     } else {
@@ -76,60 +125,57 @@ class _PictureState extends State<Picture> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String>(
-        future: downloadUserImage(FirebaseAuth.instance.currentUser.uid),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
-          }
-          if (snapshot.hasError)
-            return Center(child: Text('Error: ${snapshot.error}'));
-
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    width: 150,
-                    height: 150,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                          image: NetworkImage(snapshot.data), fit: BoxFit.fill),
-                    ),
-                  ),
-                  Positioned(
-                      top: 90,
-                      left: 90,
-                      child: MaterialButton(
-                        onPressed: getImage,
-                        color: AppTheme.ZK_Azure,
-                        textColor: Colors.white,
-                        child: Icon(
-                          Icons.add_a_photo,
-                          size: 22,
-                        ),
-                        padding: EdgeInsets.all(14),
-                        shape: CircleBorder(),
-                      ))
-                ],
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: 150,
+              height: 150,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                image: DecorationImage(
+                    image: downloadURL != null
+                        ? NetworkImage(downloadURL)
+                        : NetworkImage(
+                            'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png'),
+                    fit: BoxFit.fill),
               ),
             ),
-          );
-        });
-
-    // Scaffold(
-    //   body: Center(
-    //     child: _image == null ? Text('No image selected.') : Image.file(_image),
-    //   ),
-    //   floatingActionButton: FloatingActionButton(
-    //     onPressed: getImage,
-    //     tooltip: 'Pick Image',
-    //     child: Icon(Icons.add_a_photo),
-    //   ),
-    // );
+            Positioned(
+                top: 90,
+                right: 90,
+                child: MaterialButton(
+                  onPressed: getImage,
+                  color: AppTheme.ZK_Azure,
+                  textColor: Colors.white,
+                  child: Icon(
+                    Icons.image,
+                    size: 22,
+                  ),
+                  padding: EdgeInsets.all(14),
+                  shape: CircleBorder(),
+                )),
+            Positioned(
+                top: 90,
+                left: 90,
+                child: MaterialButton(
+                  onPressed: getPhoto,
+                  color: AppTheme.ZK_Azure,
+                  textColor: Colors.white,
+                  child: Icon(
+                    Icons.add_a_photo,
+                    size: 22,
+                  ),
+                  padding: EdgeInsets.all(14),
+                  shape: CircleBorder(),
+                ))
+          ],
+        ),
+      ),
+    );
   }
 }

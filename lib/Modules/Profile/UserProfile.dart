@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter2/Modules/Profile/Picture.dart';
+import 'package:flutter2/Modules/Profile/Infos.dart';
 import 'package:flutter2/Theme/Theme.dart';
 
 class UserProfile extends StatefulWidget {
@@ -13,7 +14,15 @@ class _UserProfileState extends State<UserProfile> {
     return Scaffold(
       appBar: AppBar(
           title: Text('User profile'), backgroundColor: AppTheme.ZK_Azure),
-      body: Picture(),
+      body: Column(
+        children: [
+          Picture(),
+          SizedBox(
+            height: 20.0,
+          ),
+          Infos()
+        ],
+      ),
     );
   }
 }
