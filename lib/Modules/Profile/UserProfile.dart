@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter2/Modules/Profile/Picture.dart';
 import 'package:flutter2/Modules/Profile/Infos.dart';
 import 'package:flutter2/Theme/Theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class UserProfile extends StatefulWidget {
   @override
@@ -16,7 +17,9 @@ class _UserProfileState extends State<UserProfile> {
           title: Text('User profile'), backgroundColor: AppTheme.ZK_Azure),
       body: Column(
         children: [
-          Picture(),
+          Picture(
+              child: 'images/',
+              path: 'images/' + FirebaseAuth.instance.currentUser.uid + '.png'),
           SizedBox(
             height: 20.0,
           ),

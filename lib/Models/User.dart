@@ -15,7 +15,7 @@ class UserHelper {
       } else {
         print('Document does not exist on the database');
       }
-    }).catchError((error) => print("Failed to get user: $error"));
+    }).catchError((error) => throw Exception('Failed to get user fact'));
   }
 
   //   static Future updateUser(id, ) {

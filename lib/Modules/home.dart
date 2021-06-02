@@ -2,7 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter2/Theme/Theme.dart';
 import 'package:flutter2/Modules/Home/PendingTasks.dart';
+import 'package:flutter2/Modules/Home/Fact.dart';
 import 'package:flutter2/Modules/Profile/UserProfile.dart';
+import 'package:flutter2/Modules/Pets/createPet.dart';
 
 class Home extends StatefulWidget {
   final String role;
@@ -70,7 +72,10 @@ class _HomeState extends State<Home> {
                       MaterialStateProperty.all<Color>(AppTheme.ZK_Olive),
                 ),
                 autofocus: false,
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => CreatePet()));
+                },
                 icon: Icon(
                   Icons.add_circle_rounded,
                   size: 40,
@@ -78,9 +83,22 @@ class _HomeState extends State<Home> {
                 label: Text('Add a pet', style: TextStyle(fontSize: 20))))
       ]),
       widget.role == 'user'
-          ? SizedBox(
-              height: 0,
-            )
+          ? Container(
+              width: MediaQuery.of(context).size.width,
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 16,
+                  ),
+                  Align(
+                    alignment: Alignment(-0.90, 0.40),
+                    child: Text('Random animal fact !',
+                        style:
+                            TextStyle(fontSize: 25, color: AppTheme.ZK_Olive)),
+                  ),
+                  DisplayFact()
+                ],
+              ))
           : Container(
               width: MediaQuery.of(context).size.width,
               child: Column(

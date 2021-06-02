@@ -13,7 +13,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 1;
-  int fiak = 1;
 
   static List<Widget> _widgetOptions = <Widget>[
     Planning(),
@@ -58,7 +57,6 @@ class ManagerHomePage extends StatefulWidget {
 
 class _ManagerHomePageState extends State<ManagerHomePage> {
   int _selectedIndex = 1;
-  int fiak = 1;
 
   static List<Widget> _widgetOptions = <Widget>[
     Team(),

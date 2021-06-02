@@ -1,11 +1,41 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter2/Theme/Theme.dart';
+import 'package:flutter2/Models/PictureHelper.dart';
 
-class Body extends StatelessWidget {
-  final DocumentSnapshot  pet;
+class Body extends StatefulWidget {
+  final DocumentSnapshot pet;
 
   const Body({Key key, this.pet}) : super(key: key);
+
+  @override
+  _BodyState createState() => _BodyState();
+}
+
+class _BodyState extends State<Body> {
+  String downloadURL;
+
+  @override
+  void initState() {
+    super.initState();
+    PictureHelper.isEmptyPicture(
+            'animals/', 'animals/' + widget.pet.id + '.png')
+        .then((value) {
+      if (value) {
+        return 'https://img.icons8.com/ios-glyphs/452/pets.png';
+      } else {
+        return PictureHelper.getPictureURL('animals/' + widget.pet.id + '.png')
+            .then((value) {
+          return value;
+        });
+      }
+    }).then((value) {
+      setState(() {
+        downloadURL = value;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -21,7 +51,11 @@ class Body extends StatelessWidget {
               height: size.height,
               child: Stack(
                 children: <Widget>[
-                  Image(image: AssetImage("assets/images/kakapo.jpg")),                
+                  Image(
+                      image: downloadURL != null
+                          ? NetworkImage(downloadURL)
+                          : NetworkImage(
+                              'https://img.icons8.com/ios-glyphs/452/pets.png')),
                   Container(
                     margin: EdgeInsets.only(top: size.height * 0.4),
                     height: 500,
@@ -33,12 +67,12 @@ class Body extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: PetDetailsSpecific(
                       size: size,
-                      pet: pet,
+                      pet: widget.pet,
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 500, 10, 0),
-                    child: OwnerInfos(pet: pet),
+                    child: OwnerInfos(pet: widget.pet),
                   ),
                 ],
               ),
@@ -50,9 +84,6 @@ class Body extends StatelessWidget {
   }
 }
 
-
-
-
 class PetDetailsSpecific extends StatelessWidget {
   final DocumentSnapshot pet;
   final Size size;
@@ -61,7 +92,6 @@ class PetDetailsSpecific extends StatelessWidget {
     @required this.size,
     this.pet,
   }) : super(key: key);
-
 
   @override
   Widget build(BuildContext context) {
@@ -97,40 +127,47 @@ class PetDetailsSpecific extends StatelessWidget {
           ),
           Row(
             children: <Widget>[
-
               Container(
                 constraints: BoxConstraints.expand(width: 100, height: 20),
                 child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Text(pet.data()['race'],
-                      style: TextStyle(
-                          fontSize: 15,
-                          color: Colors.black)),
+                      style: TextStyle(fontSize: 15, color: Colors.black)),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(200, 0, 0, 0),
                 child: Text("${pet.data()['age']} years",
-                    style: TextStyle(
-                        fontSize: 15,
-                        color: Colors.black)),
+                    style: TextStyle(fontSize: 15, color: Colors.black)),
               )
             ],
           ),
-          Row(children: <Widget>[
-            IconButton(icon: Icon(Icons.location_on, color: AppTheme.ZK_Azure,), onPressed: null),
+          Row(
+            children: <Widget>[
+              IconButton(
+                  icon: Icon(
+                    Icons.location_on,
+                    color: AppTheme.ZK_Azure,
+                  ),
+                  onPressed: null),
               Text("enclosure ${pet.data()['enclosure']}",
-                    style: TextStyle(
-                        fontSize: 15,
-                        color: Colors.black.withOpacity(0.7))),
-          ],),
-          Row(children: <Widget>[
-            IconButton(icon: Icon(Icons.restaurant, color: AppTheme.ZK_Azure,), onPressed: null),
-            Text("${pet.data()['food']}",
-                    style: TextStyle(
-                        fontSize: 15,
-                        color: Colors.black.withOpacity(0.7))),
-          ],)
+                  style: TextStyle(
+                      fontSize: 15, color: Colors.black.withOpacity(0.7))),
+            ],
+          ),
+          Row(
+            children: <Widget>[
+              IconButton(
+                  icon: Icon(
+                    Icons.restaurant,
+                    color: AppTheme.ZK_Azure,
+                  ),
+                  onPressed: null),
+              Text("${pet.data()['food']}",
+                  style: TextStyle(
+                      fontSize: 15, color: Colors.black.withOpacity(0.7))),
+            ],
+          )
         ],
       ),
     );
@@ -154,30 +191,33 @@ class OwnerInfos extends StatelessWidget {
           Row(children: <Widget>[
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 0, 200, 0),
-              child: Text("From", 
-              style: TextStyle(
-              fontSize: 20,
-              color: Colors.black.withOpacity(0.7),
-              fontWeight: FontWeight.normal),
+              child: Text(
+                "From",
+                style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.black.withOpacity(0.7),
+                    fontWeight: FontWeight.normal),
               ),
             ),
-            Text("To", 
-            style: TextStyle(
-            fontSize: 20,
-            color: Colors.black.withOpacity(0.7),
-            fontWeight: FontWeight.normal),
+            Text(
+              "To",
+              style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.black.withOpacity(0.7),
+                  fontWeight: FontWeight.normal),
             )
           ]),
           Padding(
-          padding: const EdgeInsets.symmetric(vertical: 0),
-          child: Text("Owner",
-          style: TextStyle(
-            fontSize: 20,
-            color: Colors.black.withOpacity(0.7),
-            fontWeight: FontWeight.normal),
+            padding: const EdgeInsets.symmetric(vertical: 0),
+            child: Text(
+              "Owner",
+              style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.black.withOpacity(0.7),
+                  fontWeight: FontWeight.normal),
+            ),
           ),
-        ),
-        /*
+          /*
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Text(pet.ownerName,
@@ -195,21 +235,22 @@ class OwnerInfos extends StatelessWidget {
             fontWeight: FontWeight.normal),
         ),
         */
-        Container(
-          padding: EdgeInsets.all(5.0),
-          width: (MediaQuery.of(context).size.width),
-          height: 50,
-          child: ElevatedButton(
-            style: ButtonStyle(
-            backgroundColor:
-              MaterialStateProperty.all<Color>(AppTheme.ZK_Gray),
-              foregroundColor:
-              MaterialStateProperty.all<Color>(AppTheme.ZK_Olive),
-              ),
-              autofocus: false,
-              onPressed: () => {},
-              child: Text('Delete Pet', style: TextStyle(fontSize: 20)))),
-      ],),
+          Container(
+              padding: EdgeInsets.all(5.0),
+              width: (MediaQuery.of(context).size.width),
+              height: 50,
+              child: ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(AppTheme.ZK_Gray),
+                    foregroundColor:
+                        MaterialStateProperty.all<Color>(AppTheme.ZK_Olive),
+                  ),
+                  autofocus: false,
+                  onPressed: () => {},
+                  child: Text('Delete Pet', style: TextStyle(fontSize: 20)))),
+        ],
+      ),
     );
   }
 }
