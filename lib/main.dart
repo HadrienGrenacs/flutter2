@@ -1,10 +1,7 @@
-import 'dart:developer';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'Models/Pet.dart';
 import 'login.dart';
 import 'navbar.dart';
 
@@ -17,20 +14,10 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
       ),
       home: LandingPage(),
@@ -63,7 +50,31 @@ class LandingPage extends StatelessWidget {
                   if (user == null) {
                     return LoginScreen();
                   } else {
-                    return HomePage();
+                    return StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection("users_roles")
+                          .where('user_id', isEqualTo: user.uid)
+                          .snapshots(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<QuerySnapshot> snapshot) {
+                        if (snapshot.hasData && snapshot.data != null) {
+                          final userRole = snapshot.data.docs.first['role_id'];
+                          print(userRole);
+                          if (userRole == '8FxDRBZEw6Y8H3ApNVtl' ||
+                              userRole == 'f1c93yXH0JFwHPcVbcdW') {
+                            return ManagerHomePage();
+                          } else {
+                            return HomePage();
+                          }
+                        } else {
+                          return Material(
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        }
+                      },
+                    );
                   }
                 }
 
