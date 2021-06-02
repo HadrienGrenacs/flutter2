@@ -55,6 +55,12 @@ class PetHelper {
       return (value);
     }).catchError((error) => throw Exception('Failed to add pet'));
   }
+
+  static Future<void> removePet(id) {
+    return _db.collection('animals').doc(id).delete().then((value) {
+      print("pet deleted");
+    }).catchError((error) => throw Exception('Failed to delete pet'));
+  }
 }
 
 class Pet {

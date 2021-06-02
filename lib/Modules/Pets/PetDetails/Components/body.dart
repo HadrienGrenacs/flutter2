@@ -2,6 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter2/Theme/Theme.dart';
 import 'package:flutter2/Models/PictureHelper.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter2/Models/Pet.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Body extends StatefulWidget {
   final DocumentSnapshot pet;
@@ -184,23 +187,27 @@ class OwnerInfos extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool _visible =
+        FirebaseAuth.instance.currentUser.uid == '9DGI8yGwHYY6egC7h3MVIUTTwim1'
+            ? true
+            : false;
+
     return Container(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        // crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Row(children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 200, 0),
-              child: Text(
-                "From",
-                style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.black.withOpacity(0.7),
-                    fontWeight: FontWeight.normal),
-              ),
+          Column(children: <Widget>[
+            Text(
+              "From: " +
+                  "${DateFormat.yMd().add_jm().format(pet.data()['entry'].toDate())}",
+              style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.black.withOpacity(0.7),
+                  fontWeight: FontWeight.normal),
             ),
             Text(
-              "To",
+              "To: " +
+                  "${DateFormat.yMd().add_jm().format(pet.data()['exit'].toDate())}",
               style: TextStyle(
                   fontSize: 20,
                   color: Colors.black.withOpacity(0.7),
@@ -208,47 +215,39 @@ class OwnerInfos extends StatelessWidget {
             )
           ]),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 0),
+            padding: const EdgeInsets.symmetric(vertical: 16),
             child: Text(
-              "Owner",
+              "Owner : ${pet.data()['customer']} / ${pet.data()['phone']}",
               style: TextStyle(
                   fontSize: 20,
                   color: Colors.black.withOpacity(0.7),
                   fontWeight: FontWeight.normal),
             ),
           ),
-          /*
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Text(pet.ownerName,
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.black,
-            fontWeight: FontWeight.normal),
-          ),
-        ),
-
-        Text(pet.ownerPhoneNumber,
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.black.withOpacity(0.7),
-            fontWeight: FontWeight.normal),
-        ),
-        */
           Container(
               padding: EdgeInsets.all(5.0),
               width: (MediaQuery.of(context).size.width),
               height: 50,
-              child: ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all<Color>(AppTheme.ZK_Gray),
-                    foregroundColor:
-                        MaterialStateProperty.all<Color>(AppTheme.ZK_Olive),
-                  ),
-                  autofocus: false,
-                  onPressed: () => {},
-                  child: Text('Delete Pet', style: TextStyle(fontSize: 20)))),
+              child: Visibility(
+                visible: _visible,
+                child: ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStateProperty.all<Color>(AppTheme.ZK_Gray),
+                      foregroundColor:
+                          MaterialStateProperty.all<Color>(AppTheme.ZK_Olive),
+                    ),
+                    autofocus: false,
+                    onPressed: () => {
+                          PetHelper.removePet(pet.id).then((value) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Pet deleted')));
+                            // Navigator.pop(context);
+                          }).catchError((error) =>
+                              throw Exception('Failed to delete pet'))
+                        },
+                    child: Text('Delete Pet', style: TextStyle(fontSize: 20))),
+              )),
         ],
       ),
     );

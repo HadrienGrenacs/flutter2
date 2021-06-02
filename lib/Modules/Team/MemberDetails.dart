@@ -13,9 +13,7 @@ class MemberDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          backgroundColor: AppTheme.ZK_Azure,
-          title: Text(member.data()['name'])),
+      appBar: AppBar(backgroundColor: AppTheme.ZK_Azure, title: Text('Tasks')),
       body: MemberBody(member: member),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -80,29 +78,6 @@ class MemberBody extends StatelessWidget {
                                     member.data()['email'],
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 12.0,
-                                      color: Colors.black54,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: <Widget>[
-                                  Text(
-                                    'author',
-                                    style: const TextStyle(
-                                      fontSize: 12.0,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                  Text(
-                                    'publishDate - readDuration',
                                     style: const TextStyle(
                                       fontSize: 12.0,
                                       color: Colors.black54,
